@@ -1,0 +1,8 @@
+{
+  "employee_id": "EMP-FLAKY",
+  "department": "finance",
+  "employment_type": "full_time",
+  "offer_accepted": true,
+  "document_ref": "DOC-1042",
+  "security_training_complete": false
+}

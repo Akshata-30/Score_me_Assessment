@@ -1,0 +1,70 @@
+{
+  "name": "application",
+  "version": "2",
+  "fields": {
+    "amount": {
+      "type": "integer",
+      "required": true,
+      "min": 1
+    },
+    "consent": {
+      "type": "boolean",
+      "required": true
+    },
+    "document_ref": {
+      "type": "string",
+      "required": true
+    }
+  },
+  "start": "consent",
+  "stages": {
+    "consent": {
+      "type": "rule",
+      "field": "consent",
+      "op": "eq",
+      "value": true,
+      "pass": "document",
+      "fail": "reject",
+      "reason": "Consent is required to process the application."
+    },
+    "document": {
+      "type": "rule",
+      "field": "document_ref",
+      "op": "present",
+      "pass": "verify",
+      "fail": "review",
+      "reason": "A document is required for automated approval."
+    },
+    "verify": {
+      "type": "verify",
+      "field": "document_ref",
+      "pass": "threshold",
+      "fail": "reject",
+      "exhausted": "review",
+      "max_attempts": 3,
+      "delay_seconds": 2
+    },
+    "threshold": {
+      "type": "rule",
+      "field": "amount",
+      "op": "lte",
+      "value": 25000,
+      "pass": "approve",
+      "fail": "review",
+      "reason": "Applications within the configured limit can be approved automatically."
+    },
+    "review": {
+      "type": "review",
+      "approve": "approve",
+      "reject": "reject"
+    },
+    "approve": {
+      "type": "end",
+      "outcome": "approved"
+    },
+    "reject": {
+      "type": "end",
+      "outcome": "rejected"
+    }
+  }
+}

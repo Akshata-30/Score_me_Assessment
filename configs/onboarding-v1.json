@@ -1,0 +1,109 @@
+{
+  "name": "onboarding",
+  "version": "1",
+  "fields": {
+    "employee_id": {
+      "type": "string",
+      "required": true
+    },
+    "department": {
+      "type": "string",
+      "required": true,
+      "enum": [
+        "engineering",
+        "finance",
+        "operations",
+        "people"
+      ]
+    },
+    "employment_type": {
+      "type": "string",
+      "required": true,
+      "enum": [
+        "full_time",
+        "part_time",
+        "contractor"
+      ]
+    },
+    "offer_accepted": {
+      "type": "boolean",
+      "required": true
+    },
+    "document_ref": {
+      "type": "string",
+      "required": false
+    },
+    "security_training_complete": {
+      "type": "boolean",
+      "required": false
+    }
+  },
+  "start": "employee_id",
+  "stages": {
+    "employee_id": {
+      "type": "rule",
+      "field": "employee_id",
+      "op": "present",
+      "pass": "offer",
+      "fail": "reject",
+      "reason": "An employee ID is required to verify the hire."
+    },
+    "offer": {
+      "type": "rule",
+      "field": "offer_accepted",
+      "op": "eq",
+      "value": true,
+      "pass": "paperwork",
+      "fail": "reject",
+      "reason": "The employee must accept the offer before onboarding."
+    },
+    "paperwork": {
+      "type": "rule",
+      "field": "document_ref",
+      "op": "present",
+      "pass": "directory",
+      "fail": "hr_review",
+      "reason": "HR must review missing onboarding paperwork."
+    },
+    "directory": {
+      "type": "verify",
+      "field": "employee_id",
+      "pass": "engineering",
+      "fail": "hr_review",
+      "exhausted": "hr_review",
+      "max_attempts": 3,
+      "delay_seconds": 2
+    },
+    "engineering": {
+      "type": "rule",
+      "field": "department",
+      "op": "eq",
+      "value": "engineering",
+      "pass": "security_training",
+      "fail": "ready",
+      "reason": "Engineering hires must complete security training."
+    },
+    "security_training": {
+      "type": "rule",
+      "field": "security_training_complete",
+      "op": "eq",
+      "value": true,
+      "pass": "ready",
+      "fail": "hr_review",
+      "reason": "HR must review incomplete required security training."
+    },
+    "hr_review": {
+      "type": "review",
+      "approve": "ready",
+      "reject": "reject"
+    },
+    "ready": {
+      "type": "end",
+      "outcome": "approved"
+    },
+    "reject": {
+      "type": "end",
+      "outcome": "rejected"
+    }
+  }
+}

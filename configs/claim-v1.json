@@ -1,0 +1,18 @@
+{
+  "name": "claim",
+  "version": "1",
+  "fields": {
+    "amount": {"type": "integer", "required": true, "min": 1},
+    "policy_active": {"type": "boolean", "required": true},
+    "receipt_ref": {"type": "string", "required": false}
+  },
+  "start": "coverage",
+  "stages": {
+    "coverage": {"type": "rule", "field": "policy_active", "op": "eq", "value": true, "pass": "receipt", "fail": "reject", "reason": "Only claims with active coverage can proceed."},
+    "receipt": {"type": "rule", "field": "receipt_ref", "op": "present", "pass": "threshold", "fail": "review", "reason": "A missing receipt requires review."},
+    "threshold": {"type": "rule", "field": "amount", "op": "lte", "value": 10000, "pass": "approve", "fail": "review", "reason": "Only claims within the configured limit can be approved automatically."},
+    "review": {"type": "review", "approve": "approve", "reject": "reject"},
+    "approve": {"type": "end", "outcome": "approved"},
+    "reject": {"type": "end", "outcome": "rejected"}
+  }
+}
